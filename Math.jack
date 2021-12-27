@@ -12,13 +12,38 @@
  * Note: Jack compilers implement multiplication and division using OS method calls.
  */
 class Math {
+        static int two_power;
 
     /** Initializes the library. */
     function void init() {
+        let two_power = Array.new(16);
+        let two_power[0] = 1;
+        let two_power[1] = 2;
+        let two_power[2] = 4;
+        let two_power[3] = 8;
+        let two_power[4] = 16;
+        let two_power[5] = 32;
+        let two_power[6] = 64;
+        let two_power[7] = 128;
+        let two_power[8] = 256;
+        let two_power[9] = 512;
+        let two_power[10] = 1024;
+        let two_power[11] = 2048;
+        let two_power[12] = 4096;
+        let two_power[13] = 8192;
+        let two_power[14] = 16384;
+        let two_power[15] = 32768;
+        return;
     }
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
+    if(x>0){
+      return x;
+    }
+    else {
+    return -x;
+    }
     }
 
     /** Returns the product of x and y. 
@@ -27,6 +52,52 @@ class Math {
      *  the Jack expressions x*y and multiply(x,y) return the same value.
      */
     function int multiply(int x, int y) {
+        var int i;
+        var int j;
+        var int sum;
+        var int shiftX;
+        var boolean isPos;
+
+        let isPos = true;
+        if(x<0)
+        {
+            let x=-x;
+            if(isPos ==true){
+                let isPos == false;
+            }
+            else{
+                let isPos == true;
+            }
+        }
+        if (y<0)
+        {
+            let y=-y;
+            if(isPos ==true){
+                let isPos == false;
+            }
+            else{
+                let isPos == true;
+            }
+        }
+        let sum = 0;
+        let i=0;
+        let shiftX = x;
+
+        while(i<16)
+        {
+            if(((x & powers_of_two[i]) = 0)==false)
+            {
+                let sum = sum +shiftX;
+            }
+            let shiftX=shiftX+shiftX;
+            let i = i+1;
+        }
+        if(isPos==true){
+            return sum;
+        }
+        else{
+            return -sum;
+        }
     }
 
     /** Returns the integer part of x/y.
@@ -35,22 +106,85 @@ class Math {
      *  the Jack expressions x/y and divide(x,y) return the same value.
      */
     function int divide(int x, int y) {
-		// This should be implemented without using multiplication.
-		// Hint: updating the value of 2*q*y in the "if" statement requires
-		// at most a single addition operator at every recursion step.
+        var int xNeg, yNeg;
+        var int q;
+        var int answer;
+        
+        let xNeg = x < 0;
+        let yNeg = y < 0;
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+
+        if( y > x ) {
+            return 0;
+        }
+        let q = Math.divide(x, y+y);
+        if( x-(2*q*y) < y ) {
+            let answer = q+q;
+        }
+        else {
+            let answer = q+q+1;
+        }
+        
+        if(xNeg = yNeg) {
+            return answer;
+        }
+        else {
+            return -answer;
+        }
+
+
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-		// This should be implemented without using division, but
-		// multiplication is allowed.
+    var int j;
+    var int y;
+    var int square;
+    let j=7;
+    let y=0;
+    while(j>=0)
+    {
+        let square = temp*temp;
+        if(square>0 & square <= x)
+        {
+            let y = y + Math.twoToThe(j);;
+        }
+        let j=j-1;
+    }
+    return y;
+
     }
 
     /** Returns the greater number. */
     function int max(int a, int b) {
+    if(a>b){
+        return a;
+    }
+    else {
+        return b;
+    }
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {
+        if(a>b){
+        return b;
+    }
+    else {
+        return a;
+    }
+    }
+
+    function int twoToThe(int j)
+    {
+        var int val;
+        let val = 1;
+        while(j>0)
+        {
+            let val = val+val;
+            let j=j-1;
+        }
+        return val;
     }
 }

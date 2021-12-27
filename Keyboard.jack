@@ -37,6 +37,7 @@ class Keyboard {
      * F1 - F12 = 141 - 152
      */
     function char keyPressed() {
+        return Memory.peek(24576);
     }
 
     /**								
@@ -45,6 +46,25 @@ class Keyboard {
      * of the pressed key.
      */
     function char readChar() {
+        var char c;
+        while (Keyboard.keyPressed()=0) {
+
+        }
+
+        let c = Keyboard.keyPressed();
+
+        while (~(Keyboard.keyPressed()=0)) {
+
+        }
+
+        if (c = String.backSpace()) 
+        {return c;
+        }
+        if (c = String.newLine()) {
+        return c;
+        }
+        do Output.printChar(c);
+        return c;
     }
 
     /**								
@@ -55,6 +75,35 @@ class Keyboard {
     function String readLine(String message) {
 		// You can assume input is at most 64 characters long.
 		// Why? Because this is the width of our screen!
+    var String str;
+    var char c;
+    let str = String.new(64);
+
+    do Output.printString(message);
+    while(true)
+    {
+        let c = Keyboard.readChar();
+        if (c = String.newLine())
+        {
+            do Output.println();
+            return str;
+        }
+        if (c = String.backSpace())
+        {
+            if (str.length()>0)
+            {
+                do Output.backSpace();
+                do str.eraseLastChar();
+            }
+        }
+        else
+        {
+            let str = str.appendChar(c);
+        }
+    }
+
+
+    return str;
     }   
 
     /**								
@@ -64,5 +113,8 @@ class Keyboard {
      * entered text is detected). Also handles user backspaces. 
      */
     function int readInt(String message) {
+    var String str;
+    let str = Keyboard.readLine(meassage);
+    return str.intValue();
     }
 }
