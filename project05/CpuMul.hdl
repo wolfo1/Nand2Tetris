@@ -1,0 +1,88 @@
+// This file is part of nand2tetris, as taught in The Hebrew University,
+// and was written by Aviv Yaish, and is published under the Creative 
+// Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
+// https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+// This chip is an extension of the regular CPU that uses the extended ALU.
+// If instruction[15]==0 or (instruction[14] and instruction[13] equals 1)
+// the CpuMul behave exactly as the same as the regular CPU.
+// If the instruction is a c-instruction and instruction[14] == 0, the chip will 
+// behave as follows:
+//  Instruction  | 12 | 11 | 10 |
+// ______________________________
+// dest=D<<;jump | 0  | 1  | 1  |
+// dest=A<<;jump | 0  | 1  | 0  |
+// dest=M<<;jump | 1  | 1  | 0  |
+// dest=D>>;jump | 0  | 0  | 1  |
+// dest=A>>;jump | 0  | 0  | 0  |
+// dest=M>>;jump | 1  | 0  | 0  |
+
+CHIP CpuMul {
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset=1) or continue executing
+                         // the current program (reset=0).
+    OUT outM[16],        // M value output
+        writeM,          // Write into M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+    
+    PARTS:
+	// A command
+	Not(in=instruction[15], out=Ainstruction);
+	And(a=instruction[15], b=instruction[5], out=Asel);
+    Mux16(a=instruction, b=ALUout, sel=Asel, out=AMux);
+	Or(a=Ainstruction, b=instruction[5], out=AregLoad);
+	ARegister(in=AMux, load=AregLoad, out=ARegOut);
+	// C command
+	Not(in=instruction[14], out=Cinstruction);
+	Mux16(a=ARegOut, b=inM, sel=instruction[12], out=Mout);
+	And(a=instruction[15], b=instruction[4], out=DRegLoad);
+	DRegister(in=ALUout, load=DRegLoad, out=DRegOut);
+	// ALU calculation
+	ExtendAlu(x=DRegOut, y=Mout, instruction=instruction[6..14], out=ALUout, out=outM, zr=zrout, ng=ngout);
+	// Write to M?
+	Or16(a=false, b=ARegOut, out[0..14]=addressM);
+	And(a=instruction[15], b=instruction[3], out=writeM);
+	// PC calculations
+	// null
+	Or(a=instruction[2], b=instruction[1], out=null1);
+	Or(a=null1, b=instruction[0], out=nullload);
+	// JGT
+	Or(a=zrout, b=ngout, out=NGorZR);
+	Not(in=NGorZR, out=NotNGorZR);
+	And(a=instruction[0], b=NotNGorZR, out=jgtload);
+	// JEQ
+	And(a=zrout, b=instruction[1], out=jeqload);
+	// JGE
+	Or(a=ngout, b=instruction[2], out=jge1);
+	Not(in=jge1, out=jge2);
+	And(a=jge2, b=instruction[1], out=jge3);
+	And(a=jge3, b=instruction[0], out=jgeload);
+	// JLT
+	And(a=ngout, b=instruction[2], out=jltload);
+	// JNE
+	Or(a=zrout, b=instruction[1], out=jne1);
+	Not(in=jne1, out=jne2);
+	And(a=instruction[0], b=instruction[2], out=jne3);
+	And(a=jne3, b=jne2, out=jneload);
+	// JLE
+	And(a=instruction[1], b=instruction[2], out=jle1);
+	Not(in=instruction[0], out=jle2);
+	And(a=jle2, b=NGorZR, out=jle3);
+	And(a=jle3, b=jle1, out=jleload);
+	// JMP
+	And(a=jle1, b=instruction[0], out=jmpload);
+	// checks if one of loads is 1, then load=1
+	Or(a=jgtload, b=jeqload, out=OrLoad1);
+	Or(a=jgeload, b=jltload, out=OrLoad2);
+	Or(a=jneload, b=jleload, out=OrLoad3);
+	Or(a=OrLoad1, b=jmpload, out=OrLoad4);
+	Or(a=OrLoad2, b=OrLoad3, out=OrLoad5);
+	Or(a=OrLoad4, b=OrLoad5, out=jmpCondition);
+	And(a=jmpCondition, b=nullload, out=jmpload1);
+	And(a=instruction[15], b=jmpload1, out=JumpLoad2);
+	Not(in=JumpLoad2, out=incload);
+	PC(in=ARegOut, inc=incload, load=JumpLoad2, reset=reset, out[0..14]=pc);
+}

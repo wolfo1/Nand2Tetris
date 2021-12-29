@@ -1,0 +1,32 @@
+// This file is part of nand2tetris, as taught in The Hebrew University,
+// and was written by Aviv Yaish, and is published under the Creative 
+// Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
+// https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+// The inputs of the extended ALU are instruction[9], x[16], y[16].
+// The output is defined as follows:
+// If instruction[7..8] == 1, 1, the output is the same as the regular ALU,
+// where instruction[5]=zx, instruction[4]=nx, ..., instruction[0]=no.
+// If instruction[8] == 0, the output will be a shift of the input:
+// - If instruction[4] == 0, the input "y" will be shifted, otherwise "x", 
+// - If instruction[5] == 0, the shift will be a right-shift, otherwise left.
+
+CHIP ExtendAlu {
+     IN x[16], y[16], instruction[9];
+     OUT out[16], zr, ng;
+     
+     PARTS:
+     And(a=instruction[7], b=instruction[8], out=outputload);
+	 ALU(x=x, y=y, zx=instruction[5], nx=instruction[4], zy=instruction[3],
+		ny=instruction[2], f=instruction[1], no=instruction[0], out=ALUout, zr=outzr, ng=outng);
+	 Mux16(a=y, b=x, sel=instruction[4], out=XorY);
+	 ShiftLeft(in=XorY, out=LeftOut);
+	 ShiftRight(in=XorY, out=RightOut);
+	 Mux16(a=RightOut, b=LeftOut, sel=instruction[5], out=ShiftOut);
+	 Mux16(a=ShiftOut, b=ALUout, sel=outputload, out[15]=ng, out[0..7]=finalout1, out[8..15]=finalout2, out=out);
+	 Or8Way(in=finalout1, out=or1);
+     Or8Way(in=finalout2, out=or2);
+     Or(a=or1, b=or2, out=notzr);
+     Not(in=notzr, out=zr);
+	 
+}
