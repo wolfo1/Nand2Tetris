@@ -32,7 +32,7 @@ class Math {
         let two_power[12] = 4096;
         let two_power[13] = 8192;
         let two_power[14] = 16384;
-        let two_power[15] = 32768;
+        let two_power[15] = 16384 + 16384;
         return;
     }
 
@@ -52,52 +52,21 @@ class Math {
      *  the Jack expressions x*y and multiply(x,y) return the same value.
      */
     function int multiply(int x, int y) {
-        var int i;
-        var int j;
         var int sum;
-        var int shiftX;
-        var boolean isPos;
-
-        let isPos = true;
-        if(x<0)
-        {
-            let x=-x;
-            if(isPos ==true){
-                let isPos == false;
-            }
-            else{
-                let isPos == true;
-            }
-        }
-        if (y<0)
-        {
-            let y=-y;
-            if(isPos ==true){
-                let isPos == false;
-            }
-            else{
-                let isPos == true;
-            }
-        }
+        var int shiftedX;
+        var int j;
+        
         let sum = 0;
-        let i=0;
-        let shiftX = x;
-
-        while(i<16)
-        {
-            if(((x & powers_of_two[i]) = 0)==false)
-            {
-                let sum = sum +shiftX;
+        let shiftedX = x;
+        let j = 0;
+        while( j < 16 ) {   // 16-bit numbers
+            if(Math.bit(y, j)) {
+                let sum = sum + shiftedX;
             }
-            let shiftX=shiftX+shiftX;
-            let i = i+1;
+            let shiftedX = shiftedX + shiftedX;
+            let j = j + 1;
         }
-        if(isPos==true){
-            return sum;
-        }
-        else{
-            return -sum;
-        }
+        return sum;
     }
 
     /** Returns the integer part of x/y.
@@ -132,28 +101,26 @@ class Math {
         else {
             return -answer;
         }
-
-
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-    var int j;
-    var int y;
-    var int square;
-    let j=7;
-    let y=0;
-    while(j>=0)
-    {
-        let square = temp*temp;
-        if(square>0 & square <= x)
-        {
-            let y = y + Math.twoToThe(j);;
+        var int j;
+        var int y;
+        var int approx;
+        var int square;
+        
+        let y = 0;
+        let j = 7;      // = #bits / 2 - 1
+        while( ~(j < 0) ) {
+            let approx = y + two_power[j];
+            let square = approx * approx;
+            if( ~(square > x) & (square > 0) ) {    // in case of overflow
+                let y = approx;
+            }
+            let j = j - 1;
         }
-        let j=j-1;
-    }
-    return y;
-
+        return y;
     }
 
     /** Returns the greater number. */
@@ -186,5 +153,8 @@ class Math {
             let j=j-1;
         }
         return val;
+    }
+    function boolean bit(int x, int i) {
+        return ~((x & two_power[i]) = 0);
     }
 }
