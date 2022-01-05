@@ -273,13 +273,11 @@ class Output {
 		var int x, y, screen_address, temp_cur_x, temp_cur_y;
 		let cursor_y = cursor_y - 1;
 		if (cursor_y < 0) {
+			let cursor_y = 63;
 			let cursor_x = cursor_x - 1;
 			if (cursor_x < 0) {
-				let cursor_x = 0;
-				let cursor_y = 0;
-			} else {
-				let cursor_y = 63;
-			}
+				let cursor_x = 22;
+			} 
 		}
 		let temp_cur_x = cursor_x;
 		let temp_cur_y = cursor_y;
